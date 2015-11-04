@@ -5,7 +5,16 @@ defmodule ExModbus.Mixfile do
     [app: :ex_modbus,
      version: "0.0.2",
      elixir: ">= 1.0.0",
+     description: "An Elixir ModbusTCP client implementation.",
+     package: package,
      deps: deps]
+  end
+
+  def package do
+    [maintainers: ["Falco Hirschenberger"],
+     licenses: ["MIT"],
+     links: %{"GitHub" => "https://github.com/hirschenberger/ex_modbus"}
+    ]
   end
 
   # Configuration for the OTP application
@@ -25,6 +34,6 @@ defmodule ExModbus.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    []
+    [{:earmark, "~> 0.1.19"}, {:ex_doc, "~> 0.10"}]
   end
 end
