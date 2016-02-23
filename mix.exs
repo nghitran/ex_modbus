@@ -3,7 +3,7 @@ defmodule ExModbus.Mixfile do
 
   def project do
     [app: :ex_modbus,
-     version: "0.0.2",
+     version: "0.0.3",
      elixir: ">= 1.0.0",
      description: "An Elixir ModbusTCP client implementation.",
      package: package,
