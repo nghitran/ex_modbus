@@ -30,6 +30,17 @@ defmodule ExModbus.Client do
     GenServer.call(pid, {:write_single_coil, %{unit_id: unit_id, start_address: address, state: state}})
   end
 
+
+  def write_single_register(pid, unit_id, address, data) do
+    GenServer.call(pid, {:write_single_register, %{unit_id: unit_id, start_address: address, state: data}})
+  end
+
+
+  def write_multiple_registers(pid, unit_id, address, data) do
+    GenServer.call(pid, {:write_multiple_registers, %{unit_id: unit_id, start_address: address, state: data}})
+  end
+
+
   def generic_call(pid, unit_id, {call, address, count, transform}) do
     %{data: {_type, data}} = GenServer.call(pid, {call, %{unit_id: unit_id, start_address: address, count: count}})
     transform.(data)
@@ -67,6 +78,20 @@ defmodule ExModbus.Client do
 
   def handle_call({:write_single_coil, %{unit_id: unit_id, start_address: address, state: state}}, _from, socket) do
     response = Modbus.Packet.write_single_coil(address, state)
+               |> Modbus.Tcp.wrap_packet(unit_id)
+               |> send_and_rcv_packet(socket)
+    {:reply, response, socket}
+  end
+
+  def handle_call({:write_single_register, %{unit_id: unit_id, start_address: address, state: data}}, _from, socket) do
+    response = Modbus.Packet.write_single_register(address,data)
+               |> Modbus.Tcp.wrap_packet(unit_id)
+               |> send_and_rcv_packet(socket)
+    {:reply, response, socket}
+  end
+
+  def handle_call({:write_multiple_registers, %{unit_id: unit_id, start_address: address, state: data}}, _from, socket) do
+    response = Modbus.Packet.write_multiple_registers(address, data)
                |> Modbus.Tcp.wrap_packet(unit_id)
                |> send_and_rcv_packet(socket)
     {:reply, response, socket}
