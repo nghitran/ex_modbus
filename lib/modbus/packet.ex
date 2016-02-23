@@ -4,18 +4,20 @@ defmodule Modbus.Packet do
   """
 
   # Function Codes
-  @read_coils                       0x01
-  @read_coils_exception             0x81
-  @read_discrete_inputs             0x02
-  @read_holding_registers           0x03
-  @read_holding_registers_exception 0x83
-  @read_input_registers             0x04
+  @read_coils                         0x01
+  @read_coils_exception               0x81
+  @read_discrete_inputs               0x02
+  @read_holding_registers             0x03
+  @read_holding_registers_exception   0x83
+  @read_input_registers               0x04
 
-  @write_single_coil                0x05
-  @write_single_coil_exception      0x85
-  @write_single_register            0x06
-  @write_multiple_coils             0x0f
-  @write_multiple_registers         0x10
+  @write_single_coil                  0x05
+  @write_single_coil_exception        0x85
+  @write_single_register              0x06
+  @write_single_register_exception    0x86
+  @write_multiple_coils               0x0f
+  @write_multiple_registers           0x10
+  @write_multiple_registers_exception 0x90
 
   @single_coil_off                  0x0000
   @single_coil_on                   0xff00
@@ -49,6 +51,13 @@ defmodule Modbus.Packet do
       <<unquote(function_code), unquote(starting_address)::size(16)-big, unquote(data)::size(16)-big>>
     end
   end
+
+  defmacrop write_multiple(function_code, starting_address, count, data) do
+    quote do
+      <<unquote(function_code), unquote(starting_address)::size(16)-big, unquote(count)::size(16)-big, unquote(data)::binary>>
+    end
+  end
+
 
   @doc """
   Read status from a contiguous range of coils.
@@ -92,6 +101,15 @@ defmodule Modbus.Packet do
     end
   end
 
+
+  def write_single_register(starting_address, data) do
+    write_single(@write_single_register, starting_address, data)
+  end
+
+  def write_multiple_registers(starting_address, data) do
+    write_multiple(@write_multiple_registers, starting_address, round(byte_size(data)/2), data)
+  end
+
   @doc """
   Parse a ModbusTCP response packet
   """
@@ -125,6 +143,22 @@ defmodule Modbus.Packet do
 
   def parse_response_packet(<<@write_single_coil_exception, exception>>) do
     {:ok, {:write_single_coil_exception, exception_code(exception)}}
+  end
+
+  def parse_response_packet(<<@write_single_register, _size, data::binary>>) do
+    {:ok, {:write_single_register, data}}
+  end
+
+  def parse_response_packet(<<@write_single_register_exception, exception>>) do
+    {:ok, {:write_single_register_exception, exception_code(exception)}}
+  end
+
+  def parse_response_packet(<<@write_multiple_registers, _size, data::binary>>) do
+    {:ok, {:write_multiple_registers, data}}
+  end
+
+  def parse_response_packet(<<@write_multiple_registers_exception, exception>>) do
+    {:ok, {:write_multiple_registers_exception, exception_code(exception)}}
   end
 
   def parse_response_packet(packet = <<function_code, _byte_count, _data::binary>>) do
