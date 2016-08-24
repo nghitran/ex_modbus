@@ -12,7 +12,7 @@ defmodule ExModbus.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger]]
+    [applications: [:logger, :nerves_uart]]
   end
 
   # Dependencies can be Hex packages:
@@ -25,6 +25,7 @@ defmodule ExModbus.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    []
+    #[{:serial, git: "https://github.com/bitgamma/elixir_serial", tag: "v0.1.2"}]
+    [{:nerves_uart, "~> 0.1.0"}]
   end
 end

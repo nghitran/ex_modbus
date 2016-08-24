@@ -6,7 +6,7 @@ defmodule ExModbus.Client do
   use GenServer
   require Logger
 
-  @read_timeout 5000
+  @read_timeout 4000
 
   # Public Interface
 
