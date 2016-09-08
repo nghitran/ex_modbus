@@ -3,9 +3,18 @@ defmodule ExModbus.Mixfile do
 
   def project do
     [app: :ex_modbus,
-     version: "0.0.2",
+     version: "0.0.3",
      elixir: ">= 1.0.0",
+     description: "An Elixir ModbusTCP client implementation.",
+     package: package,
      deps: deps]
+  end
+
+  def package do
+    [maintainers: ["Falco Hirschenberger"],
+     licenses: ["MIT"],
+     links: %{"GitHub" => "https://github.com/hirschenberger/ex_modbus"}
+    ]
   end
 
   # Configuration for the OTP application
@@ -25,7 +34,8 @@ defmodule ExModbus.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    #[{:serial, git: "https://github.com/bitgamma/elixir_serial", tag: "v0.1.2"}]
-    [{:nerves_uart, git: "https://github.com/dhanson358/nerves_uart", }]
+    [{:nerves_uart, git: "https://github.com/dhanson358/nerves_uart" },
+     {:earmark, "~> 0.1.19", only: :dev},
+     {:ex_doc, "~> 0.10", only: :dev}]
   end
 end
