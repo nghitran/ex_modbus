@@ -29,6 +29,10 @@ defmodule ExModbus.RtuClient do
     GenServer.call(pid, {:write_single_coil, %{slave_id: slave_id, start_address: address, state: state}})
   end
 
+  def write_multiple_registers(pid, slave_id, address, data) do
+    GenServer.call(pid, {:write_multiple_registers, %{slave_id: slave_id, start_address: address, state: data}})
+  end
+
   def generic_call(pid, slave_id, {call, address, count, transform}) do
     %{data: {_type, data}} = GenServer.call(pid, {call, %{slave_id: slave_id, start_address: address, count: count}})
     transform.(data)
@@ -68,6 +72,13 @@ defmodule ExModbus.RtuClient do
 
   def handle_call({:write_single_coil, %{slave_id: slave_id, start_address: address, state: state}}, _from, serial) do
     response = Modbus.Packet.write_single_coil(address, state)
+               |> Modbus.Rtu.wrap_packet(slave_id)
+               |> send_and_rcv_packet(serial)
+    {:reply, response, serial}
+  end
+
+  def handle_call({:write_multiple_registers, %{slave_id: slave_id, start_address: address, state: data}}, _from, serial) do
+    response = Modbus.Packet.write_multiple_registers(address, data)
                |> Modbus.Rtu.wrap_packet(slave_id)
                |> send_and_rcv_packet(serial)
     {:reply, response, serial}

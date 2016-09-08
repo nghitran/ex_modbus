@@ -54,7 +54,8 @@ defmodule Modbus.Packet do
 
   defmacrop write_multiple(function_code, starting_address, count, data) do
     quote do
-      <<unquote(function_code), unquote(starting_address)::size(16)-big, unquote(count)::size(16)-big, unquote(data)::binary>>
+      byte_len = unquote(count) * 2
+      <<unquote(function_code), unquote(starting_address)::size(16)-big, unquote(count)::size(16)-big, byte_len, unquote(data)::binary>>
     end
   end
 
