@@ -22,6 +22,10 @@ defmodule PacketTest do
     assert Modbus.Packet.write_single_coil(3, :off) == <<0x05, 0x0003::size(16), 0x00, 0x00>>
   end
 
+  test "write multiple registers" do
+    assert Modbus.Packet.write_multiple_registers(5100, <<0x00, 0x01, 0x00, 0x05>>)  == <<0x10, 0x13, 0xec, 0x00, 0x02, 0x04, 0x00, 0x01, 0x00, 0x05>>
+  end
+
   test "exception response" do
     assert {:ok, {:read_holding_registers_exception, :illegal_data_address}} == Modbus.Packet.parse_response_packet(<<131, 2>>)
     assert {:ok, {:write_single_coil_exception, :illegal_data_address}} == Modbus.Packet.parse_response_packet(<<133, 2>>)

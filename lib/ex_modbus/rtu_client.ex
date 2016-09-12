@@ -70,6 +70,13 @@ defmodule ExModbus.RtuClient do
     {:reply, response, serial}
   end
 
+  def handle_call({:write_single_register, %{unit_id: unit_id, start_address: address, state: data}}, _from, socket) do
+    response = Modbus.Packet.write_single_register(address,data)
+               |> Modbus.Tcp.wrap_packet(unit_id)
+               |> send_and_rcv_packet(socket)
+    {:reply, response, socket}
+  end
+
   def handle_call({:write_single_coil, %{slave_id: slave_id, start_address: address, state: state}}, _from, serial) do
     response = Modbus.Packet.write_single_coil(address, state)
                |> Modbus.Rtu.wrap_packet(slave_id)
