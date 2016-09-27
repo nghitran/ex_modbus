@@ -10,8 +10,8 @@ defmodule ExModbus.RtuClient do
 
   # Public Interface
 
-  def start_link(args = %{tty: _tty, speed: _speed}) do
-    GenServer.start_link(__MODULE__, args)
+  def start_link(args = %{tty: _tty, speed: _speed}, opts \\ []) do
+    GenServer.start_link(__MODULE__, args, opts)
   end
 
   def read_data(pid, slave_id, start_address, count) do
