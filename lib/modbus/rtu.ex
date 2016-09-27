@@ -7,6 +7,18 @@ defmodule Modbus.Rtu do
 
   @slave_id 0x0001
 
+  # reading functions
+  @function_read_coil_status 0x01
+  @function_read_input_status 0x02
+  @function_read_holding_registers 0x03
+  @function_read_input_registers 0x04
+
+  # writing functions
+  @function_force_single_coil 0x05
+  @function_preset_single_register 0x06
+  @function_force_multiple_coils 0x0f
+  @function_preset_multiple_registers 0x10
+
   @doc """
   Wrap `packet` in the Modbus Application Header appropriate for TCP/IP transport.
   """
@@ -15,16 +27,72 @@ defmodule Modbus.Rtu do
     <<slave_id::size(8), packet::binary, Crc16.crc_16(packet_with_slave)::size(16)-little>>
   end
 
-  # read multiple registers
-  def unwrap_packet(<<slave_id::size(8), 3, packet::binary>>) do
-    <<length::size(8), _pkt::binary>> = packet
-    packet_without_crc = Kernel.binary_part(packet, 0, length+2) # +2 because this includes the command and length bytes, plus our data length
+  @doc """
+  Remove formatting around a "Read Coil Status" call (modbus func 01)
+  """
+  def unwrap_packet(<<slave_id::size(8), @function_read_coil_status, length::size(8), packet::binary>>) do
+    packet_without_crc = Kernel.binary_part(packet, 0, length)
     %{content_length: length, slave_id: slave_id, packet: packet_without_crc}
   end
 
-  # write multiple registers
-  def unwrap_packet(<<slave_id::size(8), 16, packet::binary>>) do
-    %{content_length: 8, slave_id: slave_id, packet: packet}
+  @doc """
+  Remove formatting around a "Read Input Status" call (modbus func 02)
+  """
+  def unwrap_packet(<<slave_id::size(8), @function_read_input_status, length::size(8), packet::binary>>) do
+    packet_without_crc = Kernel.binary_part(packet, 0, length)
+    %{content_length: length, slave_id: slave_id, packet: packet_without_crc}
+  end
+
+  @doc """
+  Remove formatting around a "Read Multiple Holding Registers" call (modbus func 03)
+  """
+  def unwrap_packet(<<slave_id::size(8), @function_read_holding_registers, length::size(8), packet::binary>>) do
+    packet_without_crc = Kernel.binary_part(packet, 0, length)
+    %{content_length: length, slave_id: slave_id, packet: packet_without_crc}
+  end
+
+  @doc """
+  Remove formatting around a "Read Input Registers" call (modbus func 04)
+  """
+  def unwrap_packet(<<slave_id::size(8), @function_read_input_registers, length::size(8), packet::binary>>) do
+    packet_without_crc = Kernel.binary_part(packet, 0, length) # +2 because this includes the command and length bytes, plus our data length
+    %{content_length: length, slave_id: slave_id, packet: packet_without_crc}
+  end
+
+  @doc """
+  Remove formatting around a "Force Single Coil" call (modbus func 05)
+  """
+  def unwrap_packet(<<slave_id::size(8), @function_force_single_coil, _address_that_was_forced::size(16), packet::binary>>) do
+    length = byte_size(packet)-2
+    packet_without_crc = Kernel.binary_part(packet, 0, length) # -2 because to remove length of the CRC16
+    %{content_length: length, slave_id: slave_id, packet: packet_without_crc}
+  end
+
+  @doc """
+  Remove formatting around a "Preset Single Register" call (modbus func 06)
+  """
+  def unwrap_packet(<<slave_id::size(8), @function_preset_single_register, _address_that_was_forced::size(16), packet::binary>>) do
+    length = byte_size(packet)-2
+    packet_without_crc = Kernel.binary_part(packet, 0, length) # -2 because to remove length of the CRC16
+    %{content_length: length, slave_id: slave_id, packet: packet_without_crc}
+  end
+
+  @doc """
+  Remove formatting around a "Force Multiple Coils" call (modbus func 15)
+  """
+  def unwrap_packet(<<slave_id::size(8), @function_force_multiple_coils, _address_that_was_forced::size(16), packet::binary>>) do
+    length = byte_size(packet)-2
+    packet_without_crc = Kernel.binary_part(packet, 0, length) # -2 because to remove length of the CRC16
+    %{content_length: length, slave_id: slave_id, packet: packet_without_crc}
+  end
+
+  @doc """
+  Remove formatting around a "Preset Multiple Registers" call (modbus func 16)
+  """
+  def unwrap_packet(<<slave_id::size(8), @function_preset_multiple_registers, _address_that_was_forced::size(16), packet::binary>>) do
+    length = byte_size(packet)-2
+    packet_without_crc = Kernel.binary_part(packet, 0, length) # -2 because to remove length of the CRC16
+    %{content_length: length, slave_id: slave_id, packet: packet_without_crc}
   end
 
 end

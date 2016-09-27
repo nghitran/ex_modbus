@@ -44,7 +44,7 @@ defmodule ExModbus.RtuClient do
   def init(%{tty: tty, speed: speed}) do
      {:ok, uart_pid} = Nerves.UART.start_link
      Nerves.UART.open(uart_pid, tty, speed: speed, active: false)
-     Nerves.UART.configure(uart_pid, framing: {Nerves.UART.Framing.Modbus, slave_id: 1})
+     Nerves.UART.configure(uart_pid, framing: {ExModbus.Nerves.UART.Framing.Modbus, slave_id: 1})
      {:ok, uart_pid}
   end
 
