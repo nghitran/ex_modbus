@@ -43,32 +43,32 @@ defmodule RtuTest do
     wrapped = <<0x01, 0x05, 0x00, 0xac, 0xff, 0x00, 0x4e, 0x4b>>
     unwrapped = Modbus.Rtu.unwrap_packet(wrapped)
     assert unwrapped.slave_id == 1
-    assert unwrapped.content_length == 2
-    assert unwrapped.packet == <<0xff, 0x00>>
+    assert unwrapped.content_length == 5
+    assert unwrapped.packet == <<0x05, 0x00, 0xac, 0xff, 0x00>>
   end
 
   test "unwrap preset single register (function 0x06) packet" do
     wrapped = <<0x01, 0x06, 0x00, 0x01, 0x00, 0x03, 0x9a, 0x9b>>
     unwrapped = Modbus.Rtu.unwrap_packet(wrapped)
     assert unwrapped.slave_id == 1
-    assert unwrapped.content_length == 2
-    assert unwrapped.packet == <<0x00, 0x03>>
+    assert unwrapped.content_length == 5
+    assert unwrapped.packet == <<0x06, 0x00, 0x01, 0x00, 0x03>>
   end
 
   test "unwrap force multiple coils (function 0x0f) packet" do
     wrapped = <<0x01, 0x0f, 0x00, 0x013, 0x00, 0x0a, 0x26, 0x99>>
     unwrapped = Modbus.Rtu.unwrap_packet(wrapped)
     assert unwrapped.slave_id == 1
-    assert unwrapped.content_length == 2
-    assert unwrapped.packet == <<0x00, 0x0a>>
+    assert unwrapped.content_length == 5
+    assert unwrapped.packet == <<0x0f, 0x00, 0x013, 0x00, 0x0a>>
   end
 
   test "unwrap preset multiple registers (function 0x10) packet" do
     wrapped = <<0x01, 0x10, 0x00, 0x01, 0x00, 0x02, 0x12, 0x98>>
     unwrapped = Modbus.Rtu.unwrap_packet(wrapped)
     assert unwrapped.slave_id == 1
-    assert unwrapped.content_length == 2
-    assert unwrapped.packet == <<0x00, 0x02>>
+    assert unwrapped.content_length == 5
+    assert unwrapped.packet == <<0x10, 0x00, 0x01, 0x00, 0x02>>
   end
 
 
