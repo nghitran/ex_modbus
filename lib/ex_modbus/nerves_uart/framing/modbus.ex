@@ -81,6 +81,10 @@ defmodule ExModbus.Nerves.UART.Framing.Modbus do
   end
 
   defp process_data(data, length, in_process, state) when byte_size(data) >= 3 do
+    if length == nil do
+      length = :binary.at(data, 2 - state.line_index)
+    end
+
     data_length = byte_size(in_process <> data) - 5 # remove the 5 control bytes to get how many bytes of payload we have
     {lines, state_in_process, line_idx} = case (length == data_length) do
       true -> {state.lines++[in_process<>data], <<>>, 0} # we got the whole thing in 1 pass, so we're done
@@ -96,7 +100,7 @@ defmodule ExModbus.Nerves.UART.Framing.Modbus do
   # we don't know our expected length, and it's probably not in this packet
   # happens if we only get the first 1 or 2 bytes of Modbus return (length is in byte 3)
   defp process_data(data, nil, in_process, state) do
-    new_state = %{state | in_process: in_process <> data, line_index: byte_size(data)-1}
+    new_state = %{state | in_process: in_process <> data, line_index: byte_size(data)}
     new_state
   end
 

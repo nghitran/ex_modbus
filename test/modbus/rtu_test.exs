@@ -27,8 +27,8 @@ defmodule RtuTest do
     wrapped = <<0x01, 0x03, 0x04, 0x01, 0x02, 0x03, 0x04, 0x47, 0x52>>
     unwrapped = Modbus.Rtu.unwrap_packet(wrapped)
     assert unwrapped.slave_id == 1
-    assert unwrapped.content_length == 4
-    assert unwrapped.packet == <<0x01, 0x02, 0x03, 0x04>>
+    assert unwrapped.content_length == 6
+    assert unwrapped.packet == <<0x03, 0x04, 0x01, 0x02, 0x03, 0x04>>
   end
 
   test "unwrap read input registers (function 0x04) packet" do

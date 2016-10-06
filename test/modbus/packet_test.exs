@@ -13,6 +13,10 @@ defmodule PacketTest do
     assert Modbus.Packet.read_holding_registers(107, 3) == <<0x03, 0x006b::size(16), 0x0003::size(16)>>
   end
 
+  test "parse holding registers" do
+    assert Modbus.Packet.parse_response_packet(<<0x03, 0x04, 0x01, 0x02, 0x03, 0x04>>) == {:ok, {:read_holding_registers, [258, 772]}}
+  end
+
   test "read input registers" do
     assert Modbus.Packet.read_input_registers(8, 1) == <<0x04, 0x0008::size(16), 0x0001::size(16)>>
   end

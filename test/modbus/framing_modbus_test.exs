@@ -45,4 +45,19 @@ defmodule FramingModbusTest do
     assert Modbus.buffer_empty?(line) == true
   end
 
+  test "handles first packet being a single byte only" do
+
+    {:ok, line} = Modbus.init(max_length: 255, slave_id: 1)
+
+    assert {:in_frame, [], line} = Modbus.remove_framing(<<1>>, line)
+    assert {:in_frame, [], line} = Modbus.remove_framing(<<3, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>, line)
+    assert {:in_frame, [], line} = Modbus.remove_framing(<<0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>, line)
+    assert {:in_frame, [], line} = Modbus.remove_framing(<<0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 0, 25, 0>>, line)
+
+    assert {:ok, [
+      <<1, 3, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 0, 25, 0, 48, 0, 10, 0, 5, 0, 16, 186, 1>>
+      ], line} = Modbus.remove_framing(<<48, 0, 10, 0, 5, 0, 16, 186, 1>>, line)
+
+  end
+
 end
