@@ -24,6 +24,13 @@ defmodule FramingModbusTest do
     assert Modbus.buffer_empty?(line) == true
   end
 
+  test "rejects invalid CRC" do
+    {:ok, line} = Modbus.init(max_length: 255, slave_id: 1)
+
+    assert {:error, :invalid_crc, line} = Modbus.remove_framing(<<1, 3, 4, 0, 13, 0, 54, 235, 25>>, line)
+    assert Modbus.buffer_empty?(line) == true
+  end
+
   test "deals with extra junk data across multiple frames" do
     {:ok, line} = Modbus.init(max_length: 255, slave_id: 1)
 
@@ -45,7 +52,7 @@ defmodule FramingModbusTest do
     assert Modbus.buffer_empty?(line) == true
   end
 
-  test "handles first packet being a single byte only" do
+  test "handles first packet being a single byte only (func 3)" do
 
     {:ok, line} = Modbus.init(max_length: 255, slave_id: 1)
 
@@ -56,7 +63,36 @@ defmodule FramingModbusTest do
 
     assert {:ok, [
       <<1, 3, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 0, 25, 0, 48, 0, 10, 0, 5, 0, 16, 186, 1>>
-      ], line} = Modbus.remove_framing(<<48, 0, 10, 0, 5, 0, 16, 186, 1>>, line)
+      ], _line} = Modbus.remove_framing(<<48, 0, 10, 0, 5, 0, 16, 186, 1>>, line)
+
+  end
+
+  test "handles first two packets being a single byte only (func 3)" do
+
+    {:ok, line} = Modbus.init(max_length: 255, slave_id: 1)
+
+    assert {:in_frame, [], line} = Modbus.remove_framing(<<1>>, line)
+    assert {:in_frame, [], line} = Modbus.remove_framing(<<3>>, line)
+    assert {:in_frame, [], line} = Modbus.remove_framing(<<50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>, line)
+    assert {:in_frame, [], line} = Modbus.remove_framing(<<0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>, line)
+    assert {:in_frame, [], line} = Modbus.remove_framing(<<0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 0, 25, 0>>, line)
+
+    assert {:ok, [
+      <<1, 3, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 0, 25, 0, 48, 0, 10, 0, 5, 0, 16, 186, 1>>
+      ], _line} = Modbus.remove_framing(<<48, 0, 10, 0, 5, 0, 16, 186, 1>>, line)
+
+  end
+
+  test "handles first packet being a single byte only (func 16)" do
+
+    {:ok, line} = Modbus.init(max_length: 255, slave_id: 1)
+
+    assert {:in_frame, [], line} = Modbus.remove_framing(<<1>>, line)
+    assert {:in_frame, [], line} = Modbus.remove_framing(<<16, 0, 1>>, line)
+
+    assert {:ok, [
+      <<0x01, 0x10, 0x00, 0x01, 0x00, 0x02, 16, 8>>
+      ], _line} = Modbus.remove_framing(<<0, 2, 16, 8>>, line)
 
   end
 
