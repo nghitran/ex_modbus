@@ -46,7 +46,7 @@ defmodule Modbus.Rtu do
   @doc """
   Remove formatting around a "Read Multiple Holding Registers" call (modbus func 03)
   """
-  def unwrap_packet(<<slave_id::size(8), @function_read_holding_registers, length::size(8), _rest_of_packet::binary>>=packet) do
+  def unwrap_packet(<<slave_id::size(8), @function_read_holding_registers, _length::size(8), _rest_of_packet::binary>>=packet) do
     length = byte_size(packet)-3 # minus 3 to remove slave ID and CRC16
     packet_without_crc = Kernel.binary_part(packet, 1, length)
     %{content_length: length, slave_id: slave_id, packet: packet_without_crc}
