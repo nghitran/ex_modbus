@@ -68,6 +68,11 @@ defmodule ExModbus.Nerves.UART.Framing.Modbus do
     state.error != nil
   end
 
+  # handle empty byte
+  defp process_data_improved(<<>>, nil, _in_process, state) do
+    state # just move along...
+  end
+
   # get first byte (line_index 0)
   defp process_data_improved(<<slave_id::size(8), other_data::binary>>, nil, _in_process, %{line_index: 0} = state) do
     # @TODO: raise error if slave_id != state.slave_id
@@ -83,7 +88,7 @@ defmodule ExModbus.Nerves.UART.Framing.Modbus do
 
   # read multiple registers (function code 3)
   defp process_data_improved(<<length::size(8), other_data::binary>>, nil, _in_process, %{line_index: 2, function_code: 3} = state) do
-    new_state = %{state | expected_length: (length+5), line_index: 3, in_process: state.in_process <> <<state.slave_id, state.function_code, length>>}
+    new_state = %{state | expected_length: (length+5), line_index: 3, in_process: state.in_process <> <<length>>}
     process_data_improved(other_data, new_state.expected_length, <<state.slave_id, new_state.function_code, length>>, new_state)
   end
 
@@ -107,7 +112,7 @@ defmodule ExModbus.Nerves.UART.Framing.Modbus do
 
     {lines, state_in_process, line_idx} = case (length == data_length) do
       true -> {state.lines++[in_process<>data], <<>>, 0} # we got the whole thing in 1 pass, so we're done
-      _ -> {[], in_process<>data, byte_size(data)-1} # need to keep reading
+      _ -> {[], in_process<>data, data_length-1} # need to keep reading
     end
 
     new_state = %{state | expected_length: length, lines: lines, in_process: state_in_process, line_index: line_idx, processed: <<>>}

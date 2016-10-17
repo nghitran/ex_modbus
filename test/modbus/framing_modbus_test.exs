@@ -96,4 +96,32 @@ defmodule FramingModbusTest do
 
   end
 
+  test "handles empty responses in middle of stream" do
+
+    {:ok, line} = Modbus.init(max_length: 255, slave_id: 1)
+
+    assert {:in_frame, [], line} = Modbus.remove_framing(<<1>>, line)
+    assert {:in_frame, [], line} = Modbus.remove_framing(<<>>, line)
+    assert {:in_frame, [], line} = Modbus.remove_framing(<<16, 0, 1>>, line)
+
+    assert {:ok, [
+      <<0x01, 0x10, 0x00, 0x01, 0x00, 0x02, 16, 8>>
+      ], _line} = Modbus.remove_framing(<<0, 2, 16, 8>>, line)
+
+  end
+
+  test "handles short resp" do
+
+    {:ok, line} = Modbus.init(max_length: 255, slave_id: 1)
+
+    assert {:in_frame, [], line} = Modbus.remove_framing(<<1, 3, 8, 0>>, line)
+    assert {:in_frame, [], line} = Modbus.remove_framing(<<0, 0, 0, 0, 0, 0, 0>>, line)
+
+    assert {:ok, [
+      <<1, 3, 8, 0, 0, 0, 0, 0, 0, 0, 0, 149, 215>>
+      ], _line} = Modbus.remove_framing(<<149, 215>>, line)
+
+
+  end
+
 end
