@@ -124,4 +124,21 @@ defmodule FramingModbusTest do
 
   end
 
+
+    test "handles code func 3 error" do
+
+      {:ok, line} = Modbus.init(max_length: 255, slave_id: 1)
+
+      assert {:error, :modbus_exception, _line} = Modbus.remove_framing(<<1, 131, 02, 192, 241>>, line)
+
+    end
+
+    test "handles code func 16 error" do
+
+      {:ok, line} = Modbus.init(max_length: 255, slave_id: 1)
+
+      assert {:error, :modbus_exception, _line} = Modbus.remove_framing(<<1, 144, 03, 12, 1>>, line)
+
+    end
+
 end

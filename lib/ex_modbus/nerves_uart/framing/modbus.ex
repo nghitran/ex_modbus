@@ -98,6 +98,18 @@ defmodule ExModbus.Nerves.UART.Framing.Modbus do
     process_data_improved(other_data, 8, <<state.slave_id, new_state.function_code>>, new_state)
   end
 
+  # read multiple registers error (function code 131)
+  defp process_data_improved(other_data, nil, _in_process, %{line_index: 2, function_code: 131} = state) do
+    new_state = %{state | expected_length: 5, error: true, error_message: :modbus_exception, line_index: 3, in_process: state.in_process <> <<state.slave_id, state.function_code>>}
+    process_data_improved(other_data, 5, <<state.slave_id, new_state.function_code>>, new_state)
+  end
+
+  # write multiple registers error (function code 144)
+  defp process_data_improved(other_data, nil, _in_process, %{line_index: 2, function_code: 144} = state) do
+    new_state = %{state | expected_length: 5, error: true, error_message: :modbus_exception, line_index: 3, in_process: state.in_process <> <<state.slave_id, state.function_code>>}
+    process_data_improved(other_data, 5, <<state.slave_id, new_state.function_code>>, new_state)
+  end
+
   # deal with data that's too long
   defp process_data_improved(data, expected_length, in_process, state) when (byte_size(in_process <> data) > expected_length) do
     combined_data = in_process <> data
@@ -127,7 +139,6 @@ defmodule ExModbus.Nerves.UART.Framing.Modbus do
     packet_without_crc = Kernel.binary_part(packet, 0, byte_size(packet)-2)
     packet_crc = Kernel.binary_part(packet, byte_size(packet), -2)
     calculated_crc = <<Crc16.crc_16(packet_without_crc)::size(16)-little>>
-
     if calculated_crc == packet_crc, do: state, else: %{state | error: true, error_message: :invalid_crc}
   end
 
