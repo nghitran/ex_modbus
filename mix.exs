@@ -21,7 +21,7 @@ defmodule ExModbus.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger]]
+    [applications: [:logger, :nerves_uart]]
   end
 
   # Dependencies can be Hex packages:
@@ -34,7 +34,8 @@ defmodule ExModbus.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    [{:earmark, "~> 0.1.19", only: :dev},
+    [{:nerves_uart, git: "https://github.com/dhanson358/nerves_uart" },
+     {:earmark, "~> 0.1.19", only: :dev},
      {:ex_doc, "~> 0.10", only: :dev}]
   end
 end

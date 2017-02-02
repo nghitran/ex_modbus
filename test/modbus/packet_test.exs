@@ -13,6 +13,10 @@ defmodule PacketTest do
     assert Modbus.Packet.read_holding_registers(107, 3) == <<0x03, 0x006b::size(16), 0x0003::size(16)>>
   end
 
+  test "parse holding registers" do
+    assert Modbus.Packet.parse_response_packet(<<0x03, 0x04, 0x01, 0x02, 0x03, 0x04>>) == {:ok, {:read_holding_registers, [258, 772]}}
+  end
+
   test "read input registers" do
     assert Modbus.Packet.read_input_registers(8, 1) == <<0x04, 0x0008::size(16), 0x0001::size(16)>>
   end
@@ -20,6 +24,10 @@ defmodule PacketTest do
   test "write single coil" do
     assert Modbus.Packet.write_single_coil(5, :on)  == <<0x05, 0x0005::size(16), 0xff, 0x00>>
     assert Modbus.Packet.write_single_coil(3, :off) == <<0x05, 0x0003::size(16), 0x00, 0x00>>
+  end
+
+  test "write multiple registers" do
+    assert Modbus.Packet.write_multiple_registers(5100, <<0x00, 0x01, 0x00, 0x05>>)  == <<0x10, 0x13, 0xec, 0x00, 0x02, 0x04, 0x00, 0x01, 0x00, 0x05>>
   end
 
   test "exception response" do
