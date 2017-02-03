@@ -5,7 +5,7 @@ defmodule ExModbus.Mixfile do
     [app: :ex_modbus,
      version: "0.1.0",
      elixir: ">= 1.0.0",
-     description: "An Elixir ModbusTCP client implementation.",
+     description: "An Elixir Modbus TCP/RTU client implementation.",
      package: package,
      deps: deps]
   end
