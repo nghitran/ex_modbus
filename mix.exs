@@ -34,7 +34,7 @@ defmodule ExModbus.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    [{:nerves_uart, git: "https://github.com/dhanson358/nerves_uart" },
+    [{:nerves_uart, ">= 0.1.1"},
      {:earmark, "~> 0.1.19", only: :dev},
      {:ex_doc, "~> 0.10", only: :dev}]
   end
