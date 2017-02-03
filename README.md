@@ -1,6 +1,8 @@
 ExModbus
 ========
 
+[![Hex.pm](https://img.shields.io/hexpm/v/ex_modbus.svg?maxAge=18000=plastic)](https://hex.pm/packages/ex_modbus) [![Documentation](https://img.shields.io/badge/hexdocs-latest-blue.svg)](https://hexdocs.pm/ex_modbus/index.html)
+
 An Elixir Modbus (TCP & RTU) client implementation.
 
 RTU variant depends on [nerves_uart](http://www.github.com/nerves/nerves_uart) for serial connection.
