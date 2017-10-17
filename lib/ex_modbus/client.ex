@@ -122,8 +122,8 @@ defmodule ExModbus.Client do
     Tuple.append response, state
   end
 
-  def handle_call({:write_single_coil, %{unit_id: unit_id, start_address: address, state: state}}, _from, state) do
-    response = Modbus.Packet.write_single_coil(address, state)
+  def handle_call({:write_single_coil, %{unit_id: unit_id, start_address: address, state: data}}, _from, state) do
+    response = Modbus.Packet.write_single_coil(address, data)
                |> Modbus.Tcp.wrap_packet(unit_id)
                |> send_and_rcv_packet(state)
     Tuple.append response, state
@@ -148,7 +148,7 @@ defmodule ExModbus.Client do
   end
 
   def handle_call(msg, _from, state) do
-    Logger.info "Unknown handle_cast msg: #{inspect msg}"
+    Logger.info "Unknown handle_call msg: #{inspect msg}"
     {:reply, "unknown call message", state}
   end
 
