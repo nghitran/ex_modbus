@@ -124,9 +124,14 @@ defmodule Modbus.Packet do
   end
 
   def parse_response_packet(<<@read_coils, _byte_count, data::binary>>) do
-    status_list = for <<value::size(1) <- data>> do
-      if value == 1, do: :on, else: :off
-    end
+    status_list = 
+      for <<byte <- data>> do
+        for <<bit::size(1) <- <<byte>> >> do
+          if bit == 1, do: :on, else: :off
+        end
+      end
+      |> Enum.reverse()
+      |> List.flatten()
     {:ok, {:read_coils, status_list}}
   end
 

@@ -38,6 +38,16 @@ defmodule PacketTest do
   test "read holding registers response" do
     assert {:ok, {:read_holding_registers, [1]}} == Modbus.Packet.parse_response_packet(<<3, 2, 0, 1>>)
   end
+  
+  test "read coils response" do
+    # one byte response
+    assert {:ok, {:read_coils, [:off, :off, :off, :off, :off, :off, :on, :off]}} 
+      == Modbus.Packet.parse_response_packet(<<1, 1, 2>>)
+    # two byte response
+    assert {:ok, {:read_coils, [:off, :off, :off, :off, :off, :on, :off, :on, 
+                                :off, :off, :off, :off, :off, :off, :on, :off]}} 
+      == Modbus.Packet.parse_response_packet(<<1, 2, 2, 5>>)
+  end
 
   test "read multiple holding registers response" do
     assert {:ok, {:read_holding_registers, [2, 13313]}} ==
