@@ -36,6 +36,6 @@ defmodule ExModbus.Mixfile do
   defp deps do
     [{:nerves_uart, ">= 0.1.1"},
      {:connection, "~> 1.0.4"},
-     {:ex_doc, "~> 0.16", only: :dev}]
+     {:ex_doc, "~> 0.19", only: :dev}]
   end
 end
