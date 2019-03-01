@@ -65,15 +65,26 @@ defmodule ExModbus.Client do
     {:connect, :init, s}
   end
 
-  def init(%{ip: ip}) do
-    {:connect, :init, %{socket: nil, host: ip}}
+  def init(%{ip: ip} = opts) do
+    connection_opts = opts
+                      |> Map.put(:host, ip)
+                      |> Map.put(:socket, nil)
+                      |> Map.delete(:ip)
+    {:connect, :init, connection_opts}
   end
 
   def connect(_, %{socket: nil, host: host} = s) do
-    Logger.debug "Connecting to #{inspect(host)}"
-    case :gen_tcp.connect(host, Modbus.Tcp.port, [:binary, {:active, false}], @read_timeout) do
+    port = case s[:port] do
+      nil -> Modbus.Tcp.port()
+      tcp_port -> tcp_port
+    end
+
+    s = Map.put(s, :port, port)
+
+    Logger.debug "Connecting to #{inspect(host)}:#{inspect(port)}"
+    case :gen_tcp.connect(host, port, [:binary, {:active, false}], @read_timeout) do
       {:ok, socket} ->
-        Logger.debug "Connected to #{inspect(host)}"
+        Logger.debug "Connected to #{inspect(host)}:#{inspect(port)}"
         {:ok, %{s | socket: socket}}
       {:error, _} ->
         {:backoff, 1000, s}
